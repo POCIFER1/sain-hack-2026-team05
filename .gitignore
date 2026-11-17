@@ -1,0 +1,32 @@
+# Secrets
+id_ed25519
+api.token
+llm.key
+yandex_forms_secret.txt
+known_hosts
+secrets/
+.env
+.env.*
+
+# Access to patterns
+!.env.example
+!.env.*.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+coverage/
+
+# Frontend and temp files
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
