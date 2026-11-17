@@ -1,0 +1,324 @@
+openapi: 3.1.0
+info:
+  title: API
+  version: 0.1.0
+  description: |
+    API контракт
+servers:
+  - url: https://team05.hack.be-healthy.tech
+    description: Стенд команды
+  - url: http://localhost:8000
+    description: Локальная разработка
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Проверить работу backend
+      tags: [System]
+      responses:
+        '200':
+          description: Приложение работает
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                additionalProperties: false
+                properties:
+                  status:
+                    type: string
+                    const: ok
+  /api/v1/profile/current:
+    get:
+      operationId: getCurrentProfile
+      summary: Получить профиль одной недели для финального экрана
+      description: |
+        Возвращает подготовленную сервером сводку после успешного /run.
+      tags: [Profile]
+      responses:
+        '200':
+          description: Готовый недельный профиль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyProfile'
+        '404':
+          description: Данных для показа пока нет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PROFILE_NOT_READY
+                  message: Недельный профиль пока не подготовлен
+        '500':
+          description: Внутренняя ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/hypotheses/{hypothesis_id}/feedback:
+    post:
+      operationId: submitHypothesisFeedback
+      summary: Отметить гипотезу как «Не про меня»
+      description: |
+        Фиксирует выбор пользователя только для текущего профиля.
+      tags: [Feedback]
+      parameters:
+        - name: hypothesis_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: ID гипотезы из GET /api/v1/profile/current
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [feedback]
+              additionalProperties: false
+              properties:
+                feedback:
+                  type: string
+                  const: not_me
+            example:
+              feedback: not_me
+      responses:
+        '200':
+          description: Обратная связь зафиксирована
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [hypothesis_id, feedback]
+                additionalProperties: false
+                properties:
+                  hypothesis_id:
+                    type: string
+                  feedback:
+                    type: string
+                    const: not_me
+              example:
+                hypothesis_id: h2
+                feedback: not_me
+        '404':
+          description: Гипотеза не найдена или профиль недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    Confidence:
+      type: number
+      minimum: 0
+      maximum: 1
+      description: Уверенность от 0 до 1; для unknown не используется при оценке.
+    ChronotypePrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum: [early, intermediate, late, unknown]
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    ClockTimePrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          description: HH:MM в часовом поясе недели либо unknown.
+          pattern: '^(unknown|([01][0-9]|2[0-3]):[0-5][0-9])$'
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    SleepDurationPrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          oneOf:
+            - type: number
+              minimum: 0
+              maximum: 24
+            - type: string
+              const: unknown
+          description: Количество часов за ночь или unknown.
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    BooleanPrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          oneOf:
+            - type: boolean
+            - type: string
+              const: unknown
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    ActivityPrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum: [low, medium, high, unknown]
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    SedentaryHoursPrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum: [lt_6, between_6_and_9, gt_9, unknown]
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    WorkoutDaysPrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum: [none, one_or_two, three_plus, unknown]
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    MovementIndexPrediction:
+      type: object
+      required: [value, confidence]
+      additionalProperties: false
+      properties:
+        value:
+          type: string
+          enum: [lt_50, from_50_to_70, from_70_to_85, ge_85, unknown]
+          description: Интервалы полуоткрытые — 50, 70 и 85 относятся к верхнему.
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+    ProfileFields:
+      type: object
+      additionalProperties: false
+      required:
+        - chronotype
+        - weekday_bedtime
+        - weekday_wake_time
+        - sleep_duration_hours
+        - social_jetlag
+        - activity_level
+        - sedentary_hours
+        - workout_days
+        - works_from_home
+        - late_phone_use
+        - sain_movement_index
+      properties:
+        chronotype:
+          $ref: '#/components/schemas/ChronotypePrediction'
+        weekday_bedtime:
+          $ref: '#/components/schemas/ClockTimePrediction'
+        weekday_wake_time:
+          $ref: '#/components/schemas/ClockTimePrediction'
+        sleep_duration_hours:
+          $ref: '#/components/schemas/SleepDurationPrediction'
+        social_jetlag:
+          $ref: '#/components/schemas/BooleanPrediction'
+        activity_level:
+          $ref: '#/components/schemas/ActivityPrediction'
+        sedentary_hours:
+          $ref: '#/components/schemas/SedentaryHoursPrediction'
+        workout_days:
+          $ref: '#/components/schemas/WorkoutDaysPrediction'
+        works_from_home:
+          $ref: '#/components/schemas/BooleanPrediction'
+        late_phone_use:
+          $ref: '#/components/schemas/BooleanPrediction'
+        sain_movement_index:
+          $ref: '#/components/schemas/MovementIndexPrediction'
+    Hypothesis:
+      type: object
+      required: [id, text, confidence, feedback]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: Стабильный идентификатор в пределах недели.
+        text:
+          type: string
+          minLength: 1
+          description: Без медицинских диагнозов; о привычках и образе жизни.
+        confidence:
+          $ref: '#/components/schemas/Confidence'
+        explanation:
+          type: string
+          description: Необязательная короткая причина гипотезы.
+        feedback:
+          type: string
+          enum: [none, not_me]
+    WeeklyProfile:
+      type: object
+      required: [week, sources_present, profile, hypotheses]
+      additionalProperties: false
+      properties:
+        week:
+          type: object
+          required: [id, start_date, end_date, timezone]
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+              description: Неперсональный идентификатор недели.
+            start_date:
+              type: string
+              format: date
+            end_date:
+              type: string
+              format: date
+            timezone:
+              type: string
+              description: IANA timezone, если имеется в исходных данных.
+        sources_present:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [wearable, phone, smart_home]
+          description: Какие источники имеются у этой недели.
+        profile:
+          $ref: '#/components/schemas/ProfileFields'
+        hypotheses:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/Hypothesis'
+    ErrorResponse:
+      type: object
+      required: [error]
+      additionalProperties: false
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          additionalProperties: false
+          properties:
+            code:
+              type: string
+            message:
+              type: string
