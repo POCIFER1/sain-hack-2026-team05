@@ -15,16 +15,20 @@
   gap: 0.35em;
   color: #fafaf8;
   font-size: clamp(32px, 2.9vw, 48px);
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1;
   letter-spacing: -0.06em;
   text-decoration: none;
 }
 
 .app-brand svg {
-  width: 1.2em;
-  height: 1.2em;
+  width: 1em;
+  height: 1em;
   color: var(--accent);
+}
+
+.app-brand span {
+  transform: translateY(-5px);
 }
 
 .header-nav {
@@ -39,9 +43,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.7em;
-  min-height: 44px;
-  padding: 0.65em clamp(16px, 1.8vw, 30px);
+  gap: 0.5em;
+  min-height: 40px;
+  padding: 0.55em clamp(14px, 1.6vw, 27px);
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -56,8 +60,8 @@
 
 .header-nav__item svg {
   flex: none;
-  width: 1.35em;
-  height: 1.35em;
+  width: 1em;
+  height: 1em;
 }
 
 .header-nav__item[aria-current='page'] {
@@ -74,7 +78,7 @@
 .header-actions button {
   display: grid;
   place-items: center;
-  width: clamp(44px, 3.7vw, 62px);
+  width: clamp(40px, 3vw, 50px);
   aspect-ratio: 1;
   padding: 0;
   border: 0;

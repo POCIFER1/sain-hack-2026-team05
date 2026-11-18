@@ -1,0 +1,124 @@
+.week-metrics {
+  width: min(88%, 1470px);
+  margin-inline: auto;
+}
+
+.week-metrics__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 28px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "icon title menu"
+    "icon value value"
+    ".    change change";
+  align-content: center;
+  align-items: center;
+  column-gap: clamp(10px, 1.1vw, 18px);
+  row-gap: 7px;
+  min-height: clamp(132px, 8.8vw, 150px);
+  padding: 16px clamp(14px, 1.15vw, 20px);
+  border: 1px solid #2a2b25;
+  border-radius: 26px;
+  background: linear-gradient(145deg, #171812, #10110f 70%);
+}
+
+.metric-card__icon {
+  grid-area: icon;
+  align-self: start;
+  display: grid;
+  place-items: center;
+  width: clamp(42px, 4vw, 66px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #1b1e12;
+  color: #d3ff00;
+}
+
+.metric-card__icon svg {
+  width: 54%;
+  height: 54%;
+  stroke-width: 1.7;
+}
+
+.metric-card__title,
+.metric-card__value,
+.metric-card__change {
+  margin: 0;
+}
+
+.metric-card__title {
+  grid-area: title;
+  font-size: clamp(15px, 1.18vw, 20px);
+  font-weight: 550;
+  line-height: 1.2;
+}
+
+.metric-card__menu {
+  grid-area: menu;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #bdbfb6;
+}
+
+.metric-card__value {
+  grid-area: value;
+  font-size: clamp(21px, 1.75vw, 30px);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.metric-card__change {
+  grid-area: change;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #b7b9b1;
+  font-size: clamp(15px, 1.1vw, 19px);
+  line-height: 1.3;
+}
+
+.metric-card__change[data-highlighted='true'] {
+  color: #d3ff00;
+}
+
+.metric-card__change svg {
+  flex: none;
+  width: 1em;
+  height: 1em;
+}
+
+@media (max-width: 1199px) {
+  .week-metrics__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .week-metrics {
+    width: calc(100% - 32px);
+  }
+
+  .week-metrics__grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .metric-card {
+    min-height: 118px;
+    border-radius: 22px;
+  }
+}

@@ -40,14 +40,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.65em;
-  min-height: clamp(56px, 4.7vw, 78px);
+  min-height: clamp(46px, 3.8vw, 62px);
   margin-top: 8px;
-  padding: 0.5em 1.8em;
+  padding: 0.4em 1.4em;
   border: 0;
   border-radius: 999px;
   background: #d3ff00;
   color: #111208;
-  font-size: clamp(20px, 1.65vw, 28px);
+  font-size: clamp(17px, 1.35vw, 23px);
   font-weight: 650;
 }
 

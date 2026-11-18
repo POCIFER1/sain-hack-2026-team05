@@ -1,5 +1,6 @@
 import AppHeader from './components/AppHeader'
 import WeekHero from './components/WeekHero'
+import WeekMetrics from './components/WeekMetrics'
 
 export default function App() {
   return (
@@ -7,6 +8,7 @@ export default function App() {
       <AppHeader />
       <main>
         <WeekHero observationCount={3} />
+        <WeekMetrics />
       </main>
     </>
   )
