@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react'
 
 import './WeekHero.css'
 import WeekWave from './WeekWave'
+import WeekAnalysis from './WeekAnalysis'
 
 
 const pluralRules = new Intl.PluralRules('ru')
@@ -28,16 +29,7 @@ export default function WeekHero({ observationCount }: WeekHeroProps) {
       <div className="week-hero__content">
         <h1 id="week-title">Твоя неделя</h1>
         <p>{formatObservations(observationCount)}</p>
-
-        <button
-          className="week-hero__action"
-          type="button"
-          disabled
-        >
-          Начать анализ
-          <ArrowRight aria-hidden="true" />
-
-        </button>
+        <WeekAnalysis />
       </div>
     </section>
   )

@@ -49,6 +49,19 @@
   color: #111208;
   font-size: clamp(17px, 1.35vw, 23px);
   font-weight: 650;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+
+@media (hover: hover) {
+  .week-hero__action:hover {
+    background-color: #b9df00;
+  }
+}
+
+.week-hero__action:active {
+  background-color: #accf00;
+  transform: translateY(1px);
 }
 
 .week-hero__action svg {
@@ -93,11 +106,9 @@
   }
 
   .week-hero {
-    background: radial-gradient(
-      ellipse at 65% 55%,
-      #425a08 0%,
-      #202e06 28%,
-      transparent 65%
-    );
+    background: radial-gradient(ellipse at 65% 55%,
+        #425a08 0%,
+        #202e06 28%,
+        transparent 65%);
   }
 }
