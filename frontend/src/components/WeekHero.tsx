@@ -1,5 +1,3 @@
-import { ArrowRight } from 'lucide-react'
-
 import './WeekHero.css'
 import WeekWave from './WeekWave'
 import WeekAnalysis from './WeekAnalysis'

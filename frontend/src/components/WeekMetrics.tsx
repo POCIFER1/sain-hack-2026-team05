@@ -18,6 +18,7 @@ import {
   Sun,
   X,
   Zap,
+  Settings2,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -119,7 +120,7 @@ function MetricCard({ metric }: { metric: Metric }) {
   )
 }
 
-export default function WeekMetrics() {
+export default function WeekMetrics({ showHeading = false }: { showHeading?: boolean }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [visibleMetrics, setVisibleMetrics] = useState<Metric[]>(weeklyMetrics)
   const visibleIds = new Set(visibleMetrics.map((metric) => metric.id))
@@ -135,6 +136,16 @@ export default function WeekMetrics() {
 
   return (
     <section className="week-metrics" aria-label="Показатели недели">
+      {showHeading && (
+        <div className="result-metrics-heading">
+          <h2>Мои показатели</h2>
+          <span>Выбрано: {visibleMetrics.length}</span>
+          <button type="button" onClick={() => dialogRef.current?.showModal()}>
+            <Settings2 aria-hidden="true" />
+            Настроить
+          </button>
+        </div>
+      )}
       <ul className="week-metrics__grid">
         {visibleMetrics.map((metric) => (
           <MetricCard key={metric.id} metric={metric} />

@@ -160,10 +160,13 @@ export default function WeekAnalysis() {
             <button
               className="week-analysis__done"
               type="button"
-              onClick={() => dialogRef.current?.close()}
+              onClick={() => {
+                dialogRef.current?.close() 
+                window.location.hash = '/week-result'
+              }}
             >
               <Check aria-hidden="true" />
-              Готово
+              Посмотреть результат
             </button>
           )}
         </div>
