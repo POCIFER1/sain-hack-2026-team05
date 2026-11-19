@@ -1,0 +1,236 @@
+.week-hero__action.week-analysis-trigger {
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+
+@media (hover: hover) {
+  .week-hero__action.week-analysis-trigger:hover {
+    background-color: #b9df00;
+  }
+}
+
+.week-hero__action.week-analysis-trigger:active {
+  background-color: #accf00;
+  transform: translateY(1px);
+}
+
+.week-analysis {
+  box-sizing: border-box;
+  width: min(660px, calc(100% - 32px));
+  max-height: 86dvh;
+  margin: auto;
+  padding: clamp(22px, 3.5vw, 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgb(211 255 0 / 32%);
+  border-radius: 26px;
+  background:
+    radial-gradient(ellipse at top left, rgb(150 190 15 / 10%), transparent 58%),
+    rgb(17 19 14 / 92%);
+  color: #f5f5f2;
+  text-align: left;
+  box-shadow: 0 20px 80px rgb(0 0 0 / 55%);
+  backdrop-filter: blur(20px);
+}
+
+.week-analysis::backdrop {
+  background: rgb(0 0 0 / 52%);
+  backdrop-filter: blur(4px);
+}
+
+.week-analysis__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.week-analysis__header h2 {
+  flex: 1;
+  margin: 0;
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.week-analysis__count {
+  color: #d2d4ca;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.week-analysis__close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 4%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.week-analysis__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.week-analysis__progress {
+  display: block;
+  width: 100%;
+  height: 9px;
+  margin: 20px 0 clamp(24px, 3vw, 38px);
+  overflow: hidden;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: #34372d;
+  color: #d3ff00;
+}
+
+.week-analysis__progress::-webkit-progress-bar {
+  background: #34372d;
+}
+
+.week-analysis__progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: #d3ff00;
+}
+
+.week-analysis__progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: #d3ff00;
+}
+
+.week-analysis__question {
+  margin: 0;
+  font-size: clamp(24px, 2.5vw, 36px);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.week-analysis .week-analysis__detail {
+  margin: 14px 0 0;
+  color: #b8bcaf;
+  font-size: clamp(16px, 1.5vw, 21px);
+  line-height: 1.45;
+}
+
+.week-analysis__options {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.week-analysis__option,
+.week-analysis__done {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 12px 22px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 3%);
+  color: #f5f5f2;
+  font: inherit;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 100ms ease,
+    border-color 100ms ease,
+    transform 100ms ease;
+}
+
+.week-analysis__option {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.week-analysis__option svg,
+.week-analysis__done svg {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  color: #d3ff00;
+}
+
+.week-analysis__option[data-selected='true'] {
+  border-color: #d3ff00;
+  background: rgb(211 255 0 / 13%);
+}
+
+.week-analysis__option[aria-disabled='true'] {
+  cursor: default;
+}
+
+.week-analysis__option:active,
+.week-analysis__done:active {
+  transform: scale(0.99);
+}
+
+.week-analysis__done {
+  margin-top: 24px;
+  border-color: #d3ff00;
+  color: #d3ff00;
+}
+
+@media (hover: hover) {
+  .week-analysis__option[aria-disabled='false']:hover,
+  .week-analysis__done:hover,
+  .week-analysis__close:hover {
+    border-color: #d3ff00;
+    background: rgb(211 255 0 / 7%);
+  }
+}
+
+.week-analysis button:focus-visible,
+.week-analysis-trigger:focus-visible {
+  outline: 2px solid #d3ff00;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .week-analysis__step {
+    animation: analysis-step-in 180ms ease-out both;
+  }
+
+  .week-analysis__step[data-leaving='true'] {
+    animation: analysis-step-out 120ms ease-in 100ms forwards;
+  }
+
+  @keyframes analysis-step-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes analysis-step-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .week-hero__action.week-analysis-trigger,
+  .week-analysis__option,
+  .week-analysis__done {
+    transition: none;
+    transform: none;
+  }
+}
