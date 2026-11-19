@@ -1,56 +1,161 @@
-"""Пример бэкенда команды для стенда хакатона Sain x Школа 21."""
+import logging
+from typing import Any, Literal
 
-import os
-
-from fastapi import FastAPI, Header
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
-TEAM = os.environ.get("TEAM", "unknown")
+from analytics import analyze_dataset
+from case3_contract import validate_case3_answers
+from hackathon_client import HackathonAPIError, get_case3_dataset
 
-app = FastAPI(title=f"hackathon {TEAM}")
+
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="SAIN Case 3 Backend",
+    version="0.1.0",
+)
 
 
-@app.get("/")
+class RunRequest(BaseModel):
+    case: Literal[3]
+    dataset_code: str = Field(min_length=1, max_length=256)
+
+
+def require_bearer_authorization(
+    authorization: str | None,
+) -> str:
+    if not authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Bearer token required",
+        )
+
+    scheme, separator, token = authorization.partition(" ")
+
+    if (
+        not separator
+        or scheme.lower() != "bearer"
+        or not token.strip()
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Authorization header",
+        )
+
+    return authorization
+
+
+def extract_record_ids(
+    dataset: dict[str, Any],
+) -> list[str]:
+    weeks = dataset.get("weeks")
+
+    if not isinstance(weeks, list) or not weeks:
+        raise ValueError("Dataset must contain a non-empty weeks array")
+
+    record_ids = []
+
+    for week in weeks:
+        if not isinstance(week, dict):
+            raise ValueError("Invalid dataset week")
+
+        record_id = week.get("record_id")
+
+        if not isinstance(record_id, str) or not record_id:
+            raise ValueError("Missing or invalid record_id")
+
+        record_ids.append(record_id)
+
+    if len(record_ids) != len(set(record_ids)):
+        raise ValueError("Duplicate record_id in dataset")
+
+    return record_ids
+
+
+@app.get("/", include_in_schema=False)
 def root() -> dict[str, str]:
-    """Главная: показывает, какой команде принадлежит сервис."""
-    return {"team": TEAM, "status": "ok"}
+    return {
+        "service": "sain-case3",
+        "status": "ok",
+    }
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    """Проверка живости для организаторов и мониторинга."""
-    return {"team": TEAM, "status": "ok"}
-
-
-class RunRequest(BaseModel):
-    """Что стенд присылает в теле POST /run."""
-
-    case: int = Field(ge=1, le=4)  # номер кейса, 1..4
-    dataset_code: str = Field(min_length=1, max_length=128)  # код набора этапа (online или final)
+    return {"status": "ok"}
 
 
 @app.post("/run")
-def run(req: RunRequest, authorization: str | None = Header(default=None)) -> JSONResponse:
-    """Онлайн-проверка 20.11 и финал 22.11: этот метод вызывает сам стенд, без участия команды.
+def run(
+    body: RunRequest,
+    authorization: str | None = Header(default=None),
+) -> dict[str, Any]:
+    """Process all dataset weeks and return validated Case 3 answers."""
 
-    Что придёт:
-      - тело {"case": N, "dataset_code": "<код набора>"};
-      - заголовок Authorization: Bearer <токен проверки>. Это не HACK_TEAM_TOKEN: токен действует
-        только на время проверки и только для наборов этого этапа.
+    auth_header = require_bearer_authorization(authorization)
 
-    Что сделать:
-      1. Взять данные: GET {HACK_API_URL}/case/{case}/getData?dataset_code={dataset_code}
-         с тем же заголовком Authorization, что пришёл сюда. Один раз, весь набор целиком.
-      2. Посчитать ответ кейса (нейросеть — через LLM_BASE_URL, LLM_API_KEY, LLM_MODEL из env).
+    try:
+        # Hidden evaluation datasets require the incoming Bearer token.
+        dataset = get_case3_dataset(
+            dataset_code=body.dataset_code,
+            authorization=auth_header,
+        )
 
-    Что вернуть: сам ответ кейса в теле этого ответа — HTTP 200, JSON в том же формате, что принимает
-    POST {HACK_API_URL}/case/{case}/validate. В API ответ не сдавайте: стенд сохранит его сам.
-    Стенд ждёт до 45 минут, потом попытка засчитывается как таймаут. В online одна попытка на кейс.
+    except HackathonAPIError as exc:
+        logger.error("Case 3 dataset retrieval failed")
 
-    Не печатайте токен, данные набора и ответы в логи и не возвращайте их в ответе.
-    """
-    if not authorization or not authorization.startswith("Bearer "):
-        return JSONResponse(status_code=401, content={"status": "error", "error": "нет Authorization: Bearer"})
-    # Здесь ваша логика кейса req.case. Пока её нет — честно отвечаем 501, а не «done».
-    return JSONResponse(status_code=501, content={"status": "not_implemented", "case": req.case})
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to retrieve dataset",
+        ) from exc
+
+    try:
+        expected_record_ids = extract_record_ids(dataset)
+
+    except ValueError as exc:
+        logger.error("Invalid Case 3 dataset structure")
+
+        raise HTTPException(
+            status_code=502,
+            detail="Invalid Case 3 dataset structure",
+        ) from exc
+
+    try:
+        answers = analyze_dataset(dataset)
+
+    except NotImplementedError as exc:
+        raise HTTPException(
+            status_code=501,
+            detail="Analytics is not implemented",
+        ) from exc
+
+    finally:
+        del dataset
+
+    if not isinstance(answers, dict):
+        raise HTTPException(
+            status_code=500,
+            detail="Analytics must return a JSON object",
+        )
+
+    try:
+        validate_case3_answers(
+            answers,
+            expected_record_ids=expected_record_ids,
+        )
+
+    except ValueError as exc:
+        logger.error("Case 3 output validation failed")
+
+        raise HTTPException(
+            status_code=500,
+            detail="Analytics output violates Case3Answers contract",
+        ) from exc
+
+    logger.info(
+        "Case 3 run completed: %d weeks",
+        len(expected_record_ids),
+    )
+
+    return answers
