@@ -35,6 +35,20 @@ Frontend разработан на React, TypeScript и Vite. Для запус�
 cd frontend && npm ci && npm run dev
 ```
 
+**Макеты веб приложения**
+
+![Макет интерфейса](images/sain1.jpg)
+
+![Макет интерфейса](images/sain2.jpg)
+
+![Макет интерфейса](images/sain3.jpg)
+
+![Макет интерфейса](images/sain4.jpg)
+
+![Макет интерфейса](images/sain5.jpg)
+
+![Макет интерфейса](images/sain6.jpg)
+
 **Концепт вещи**
 
 КОНЦЕПЦИЯ УСТРОЙСТВА:
